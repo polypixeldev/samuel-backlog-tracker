@@ -1,0 +1,58 @@
+const { App } = require('@slack/bolt');
+require('dotenv').config();
+
+const app = new App({
+  token: process.env.SLACK_BOT_TOKEN,
+  appToken: process.env.SLACK_APP_TOKEN,
+  socketMode: true,
+});
+
+let count = 0;
+
+app.event('star_added', async ({ event, client }) => {
+	count++;
+	updateCount();
+});
+
+app.event('star_removed', async ({ event, client }) => {
+	count--;
+	updateCount();
+});
+
+const authData = new FormData();
+authData.set('token', process.env.SLACK_CLIENT_TOKEN);
+authData.set('_x_app_name', 'client');
+authData.set('_x_reason', 'saved-api/savedList');
+authData.set('_x_mode', 'online');
+authData.set('_x_sonic', 'true');
+
+fetch("https://hackclub.slack.com/api/saved.list?_x_id=829ee587-1712708450.151&_x_csid=JmcOvVbEE0U&slack_route=T0266FRGM&_x_version_ts=1712706141&_x_frontend_build_type=current&_x_desktop_ia=4&_x_gantry=true&fp=22", {
+	method: "POST",
+	body: authData,
+	headers: {
+		"Cookie": process.env.SLACK_COOKIE,
+	}
+}).then(res => res.json()).then(data => {
+	if (data.ok) {
+		count = data.counts.uncompleted_count + data.counts.uncompleted_overdue_count;
+		updateCount();
+	}
+});
+
+async function updateCount() {
+	const currentTopic = await app.client.conversations.info({
+		channel: process.env.SLACK_CHANNEL_ID,
+	});
+
+	const realTopic = (currentTopic.channel?.topic?.value ?? "").split(' :bookmark: ')[0];
+
+	app.client.conversations.setTopic({
+		channel: process.env.SLACK_CHANNEL_ID,
+		topic: `${realTopic} :bookmark: Samuel currently has ${count} item${count === 1 ? '' : 's'} to complete!`,
+	})
+}
+
+(async () => {
+  await app.start();
+  console.log("Now tracking Samuel's backlog!");
+})();
