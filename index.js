@@ -1,7 +1,7 @@
-const { App } = require('@slack/bolt');
-require('dotenv').config();
+import Slack from '@slack/bolt';
+import 'dotenv/config';
 
-const app = new App({
+const app = new Slack.App({
   token: process.env.SLACK_BOT_TOKEN,
   appToken: process.env.SLACK_APP_TOKEN,
   socketMode: true,
@@ -9,12 +9,12 @@ const app = new App({
 
 let count = 0;
 
-app.event('star_added', async ({ event, client }) => {
+app.event('star_added', async () => {
 	count++;
 	updateCount();
 });
 
-app.event('star_removed', async ({ event, client }) => {
+app.event('star_removed', async () => {
 	count--;
 	updateCount();
 });
