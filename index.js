@@ -40,15 +40,16 @@ fetch("https://hackclub.slack.com/api/saved.list?_x_id=829ee587-1712708450.151&_
 });
 
 async function updateCount() {
-	const currentTopic = await app.client.conversations.info({
-		channel: process.env.SLACK_CHANNEL_ID,
+	const bookmarks = await app.client.bookmarks.list({
+		channel_id: process.env.SLACK_CHANNEL_ID,
 	});
 
-	const realTopic = (currentTopic.channel?.topic?.value ?? "").split(' :bookmark: ')[0];
+	const bookmarkId = bookmarks.bookmarks.find(bookmark => bookmark.emoji === ":bookmark:")?.id;
 
-	app.client.conversations.setTopic({
-		channel: process.env.SLACK_CHANNEL_ID,
-		topic: `${realTopic} :bookmark: Samuel currently has ${count} item${count === 1 ? '' : 's'} to complete!`,
+	app.client.bookmarks.edit({
+		bookmark_id: bookmarkId,
+		channel_id: process.env.SLACK_CHANNEL_ID,
+		title: `${count} items to complete!`
 	})
 }
 
