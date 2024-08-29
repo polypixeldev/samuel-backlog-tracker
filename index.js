@@ -13,9 +13,11 @@ const app = new Slack.App({
 let count = 0;
 
 app.event('star_added', async (e) => {
-	await prisma.item.create({
+	await prisma.item.upsert({
 		data: {
-			ts: e.payload.item.message.ts
+			ts: e.payload.item.message.ts,
+      timeAdded: new Date(),
+      timeRemoved: null
 		}
 	});
 
