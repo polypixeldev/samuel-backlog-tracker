@@ -14,11 +14,18 @@ let count = 0;
 
 app.event('star_added', async (e) => {
 	await prisma.item.upsert({
-		data: {
+    where: {
+      ts: e.payload.item.message.ts
+    },
+		create: {
 			ts: e.payload.item.message.ts,
       timeAdded: new Date(),
       timeRemoved: null
-		}
+		},
+    update: {
+      timeAdded: new Date(),
+      timeRemoved: null
+    }
 	});
 
 	count++;
