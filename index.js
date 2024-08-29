@@ -33,14 +33,18 @@ app.event('star_added', async (e) => {
 });
 
 app.event('star_removed', async (e) => {
-	await prisma.item.update({
-		where: {
-			ts: e.payload.item.message.ts
-		},
-		data: {
-			timeRemoved: new Date()
-		}
-	});
+  try {
+    await prisma.item.update({
+      where: {
+        ts: e.payload.item.message.ts
+      },
+      data: {
+        timeRemoved: new Date()
+      }
+    });
+  } catch (e) {
+    console.error(e);
+  }
 
 	count--;
 	updateCount();
