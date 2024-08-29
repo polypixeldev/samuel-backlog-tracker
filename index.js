@@ -62,8 +62,8 @@ fetch("https://hackclub.slack.com/api/saved.list?_x_id=829ee587-1712708450.151&_
 async function calculateAverage() {
 	const tasks = await prisma.item.findMany({
 		where: {
-			timeRemoved: {
-        not: null
+      NOT: {
+        timeRemoved: null
       }
 		}
 	});
