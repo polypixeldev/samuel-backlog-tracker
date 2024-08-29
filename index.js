@@ -76,7 +76,7 @@ async function calculateAverage() {
 	});
 
 	const total = tasks.reduce((acc, task) => {
-		return acc + task.timeRemoved.valueOf() - task.createdAt.valueOf();
+		return acc + task.timeRemoved.valueOf() - task.timeAdded.valueOf();
 	}, 0);
 
   const avg = total / tasks.length;
