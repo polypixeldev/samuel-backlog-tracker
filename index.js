@@ -1,5 +1,8 @@
 import Slack from '@slack/bolt';
+import { PrismaClient } from '@prisma/client';
 import 'dotenv/config';
+
+const prisma = new PrismaClient();
 
 const app = new Slack.App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -9,12 +12,27 @@ const app = new Slack.App({
 
 let count = 0;
 
-app.event('star_added', async () => {
+app.event('star_added', async (e) => {
+	await prisma.item.create({
+		data: {
+			ts: e.payload.item.message.ts
+		}
+	});
+
 	count++;
 	updateCount();
 });
 
 app.event('star_removed', async () => {
+	await prisma.item.update({
+		where: {
+			ts: e.payload.item.message.ts
+		},
+		data: {
+			timeRemoved: new Date()
+		}
+	});
+
 	count--;
 	updateCount();
 });
@@ -39,17 +57,40 @@ fetch("https://hackclub.slack.com/api/saved.list?_x_id=829ee587-1712708450.151&_
 	}
 });
 
+async function calculateAverage() {
+	const tasks = await prisma.item.findMany({
+		where: {
+			timeRemoved: {
+				not: null
+			}
+		}
+	});
+
+	const total = tasks.reduce((acc, task) => {
+		return acc + task.timeRemoved - task.createdAt;
+	}, 0);
+
+	return total / tasks.length;
+}
+
 async function updateCount() {
 	const bookmarks = await app.client.bookmarks.list({
 		channel_id: process.env.SLACK_CHANNEL_ID,
 	});
 
-	const bookmarkId = bookmarks.bookmarks.find(bookmark => bookmark.emoji === ":bookmark:")?.id;
+	const countId = bookmarks.bookmarks.find(bookmark => bookmark.emoji === ":bookmark:")?.id;
+	const timeId = bookmarks.bookmarks.find(bookmark => bookmark.emoji === ":clock1:")?.id;
 
 	app.client.bookmarks.edit({
-		bookmark_id: bookmarkId,
+		bookmark_id: countId,
 		channel_id: process.env.SLACK_CHANNEL_ID,
 		title: `${count} items to complete!`
+	})
+
+	app.client.bookmarks.edit({
+		bookmark_id: timeId,
+		channel_id: process.env.SLACK_CHANNEL_ID,
+		title: `Avg time per task: ${await calculateAverage()}`
 	})
 }
 

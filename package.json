@@ -12,7 +12,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^5.19.0",
     "@slack/bolt": "^3.17.1",
     "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "prisma": "^5.19.0"
   }
 }
