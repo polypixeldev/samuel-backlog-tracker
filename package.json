@@ -14,7 +14,8 @@
   "dependencies": {
     "@prisma/client": "^5.19.0",
     "@slack/bolt": "^3.17.1",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "pretty-ms": "^9.1.0"
   },
   "devDependencies": {
     "prisma": "^5.19.0"

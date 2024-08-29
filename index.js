@@ -1,5 +1,6 @@
 import Slack from '@slack/bolt';
 import { PrismaClient } from '@prisma/client';
+import prettyms from 'pretty-ms';
 import 'dotenv/config';
 
 const prisma = new PrismaClient();
@@ -60,8 +61,8 @@ async function calculateAverage() {
 	const tasks = await prisma.item.findMany({
 		where: {
 			timeRemoved: {
-				not: null
-			}
+        not: null
+      }
 		}
 	});
 
@@ -69,7 +70,9 @@ async function calculateAverage() {
 		return acc + task.timeRemoved - task.createdAt;
 	}, 0);
 
-	return total / tasks.length;
+  const avg = total / tasks.length;
+
+	return isNaN(avg) ? "N/A" : prettyms(avg, { compact: true });
 }
 
 async function updateCount() {
