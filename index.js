@@ -6,8 +6,7 @@ const prisma = new PrismaClient();
 
 const app = new Slack.App({
   token: process.env.SLACK_BOT_TOKEN,
-  appToken: process.env.SLACK_APP_TOKEN,
-  socketMode: true,
+  signingSecret: process.env.SLACK_SIGNING_SECRET
 });
 
 let count = 0;
@@ -95,6 +94,6 @@ async function updateCount() {
 }
 
 (async () => {
-  await app.start();
+  await app.start(process.env.PORT ?? 3000);
   console.log("Now tracking Samuel's backlog!");
 })();
