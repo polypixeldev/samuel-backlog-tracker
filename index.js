@@ -78,7 +78,7 @@ async function updateCount() {
 	});
 
 	const countId = bookmarks.bookmarks.find(bookmark => bookmark.emoji === ":bookmark:")?.id;
-	const timeId = bookmarks.bookmarks.find(bookmark => bookmark.emoji === ":alarm-clock:")?.id;
+	const timeId = bookmarks.bookmarks.find(bookmark => bookmark.emoji === ":alarm_clock:")?.id;
 
 	app.client.bookmarks.edit({
 		bookmark_id: countId,
