@@ -22,7 +22,7 @@ app.event('star_added', async (e) => {
 	updateCount();
 });
 
-app.event('star_removed', async () => {
+app.event('star_removed', async (e) => {
 	await prisma.item.update({
 		where: {
 			ts: e.payload.item.message.ts
