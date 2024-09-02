@@ -18,9 +18,9 @@ const app = new Slack.App({
 
 let count = 0;
 
-expressApp.get("/refresh", (req, res) => {
-  refreshTasks();
-  res.status(200).write("wheeeeee it has been refreshed!");
+expressApp.get("/refresh", async (req, res) => {
+  await refreshTasks();
+  res.status(200).send("the backlog has been refreshed!");
 });
 
 app.event("star_added", async (e) => {
