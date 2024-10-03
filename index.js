@@ -96,6 +96,10 @@ async function calculateAverage() {
         not: null,
       },
     },
+    orderBy: {
+      timeAdded: "desc",
+    },
+    take: 50,
   });
 
   const total = tasks.reduce((acc, task) => {
@@ -104,7 +108,7 @@ async function calculateAverage() {
 
   const avg = total / tasks.length;
 
-  return isNaN(avg) ? "N/A" : prettyms(avg, { compact: true });
+  return isNaN(avg) ? "N/A" : prettyms(avg);
 }
 
 async function updateCount() {
