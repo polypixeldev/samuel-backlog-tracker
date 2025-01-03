@@ -49,7 +49,7 @@ async function refreshTasks() {
           data.counts.uncompleted_count + data.counts.uncompleted_overdue_count;
 
         const savedIds = data.saved_items.map((i) => i.ts);
-        for (const item in data.saved_items) {
+        for (const item of data.saved_items) {
           await prisma.item.upsert({
             where: {
               ts: item.ts,
@@ -74,7 +74,7 @@ async function refreshTasks() {
 
         const removedItems = currentItems.filter((i) => !savedIds.includes(i));
 
-        for (const item in removedItems) {
+        for (const item of removedItems) {
           await prisma.item.update({
             where: {
               ts: item,
