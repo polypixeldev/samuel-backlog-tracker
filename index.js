@@ -72,12 +72,14 @@ async function refreshTasks() {
           },
         });
 
-        const removedItems = currentItems.filter((i) => !savedIds.includes(i));
+        const removedItems = currentItems.filter(
+          (i) => !savedIds.includes(i.ts),
+        );
 
         for (const item of removedItems) {
           await prisma.item.update({
             where: {
-              ts: item,
+              ts: item.ts,
             },
             data: {
               timeRemoved: new Date(),
