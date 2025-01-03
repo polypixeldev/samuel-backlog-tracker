@@ -56,11 +56,11 @@ async function refreshTasks() {
             },
             create: {
               ts: item.ts,
-              timeAdded: new Date(e.date_created * 1000),
+              timeAdded: new Date(item.date_created * 1000),
               timeRemoved: null,
             },
             update: {
-              timeAdded: new Date(e.date_created * 1000),
+              timeAdded: new Date(item.date_created * 1000),
               timeRemoved: null,
             },
           });
