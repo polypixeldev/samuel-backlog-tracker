@@ -23,6 +23,13 @@ expressApp.get("/refresh", async (req, res) => {
   res.status(200).send("the backlog has been refreshed!");
 });
 
+expressApp.get("/status", async (req, res) => {
+  res.json({
+    count,
+    status: `Avg time per task: ${await calculateAverage()}`,
+  });
+});
+
 async function refreshTasks() {
   const data = new FormData();
   data.set("token", process.env.SLACK_CLIENT_TOKEN);
