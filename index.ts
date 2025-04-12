@@ -6,7 +6,7 @@ import "dotenv/config";
 const prisma = new PrismaClient();
 
 const expressReceiver = new Slack.ExpressReceiver({
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
+  signingSecret: process.env.SLACK_SIGNING_SECRET!,
 });
 
 const expressApp = expressReceiver.app;
@@ -32,7 +32,7 @@ expressApp.get("/status", async (req, res) => {
 
 async function refreshTasks() {
   const data = new FormData();
-  data.set("token", process.env.SLACK_CLIENT_TOKEN);
+  data.set("token", process.env.SLACK_CLIENT_TOKEN!);
   data.set("_x_app_name", "client");
   data.set("_x_reason", "saved-api/savedList");
   data.set("_x_mode", "online");
@@ -45,7 +45,7 @@ async function refreshTasks() {
       method: "POST",
       body: data,
       headers: {
-        Cookie: process.env.SLACK_COOKIE,
+        Cookie: process.env.SLACK_COOKIE!,
       },
     },
   )
@@ -113,7 +113,7 @@ async function calculateAverage() {
   });
 
   const total = tasks.reduce((acc, task) => {
-    return acc + task.timeRemoved.valueOf() - task.timeAdded.valueOf();
+    return acc + task.timeRemoved!.valueOf() - task.timeAdded.valueOf();
   }, 0);
 
   const avg = total / tasks.length;
@@ -123,25 +123,25 @@ async function calculateAverage() {
 
 async function updateCount() {
   const bookmarks = await app.client.bookmarks.list({
-    channel_id: process.env.SLACK_CHANNEL_ID,
+    channel_id: process.env.SLACK_CHANNEL_ID!,
   });
 
-  const countId = bookmarks.bookmarks.find(
+  const countId = bookmarks.bookmarks!.find(
     (bookmark) => bookmark.emoji === ":bookmark:",
   )?.id;
-  const timeId = bookmarks.bookmarks.find(
+  const timeId = bookmarks.bookmarks!.find(
     (bookmark) => bookmark.emoji === ":alarm_clock:",
   )?.id;
 
   app.client.bookmarks.edit({
-    bookmark_id: countId,
-    channel_id: process.env.SLACK_CHANNEL_ID,
+    bookmark_id: countId!,
+    channel_id: process.env.SLACK_CHANNEL_ID!,
     title: `${count} items to complete!`,
   });
 
   app.client.bookmarks.edit({
-    bookmark_id: timeId,
-    channel_id: process.env.SLACK_CHANNEL_ID,
+    bookmark_id: timeId!,
+    channel_id: process.env.SLACK_CHANNEL_ID!,
     title: `Avg time per task: ${await calculateAverage()}`,
   });
 }
