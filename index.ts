@@ -1,6 +1,8 @@
 import Slack from "@slack/bolt";
 import { PrismaClient } from "@prisma/client";
 import prettyms from "pretty-ms";
+import { TodoistApi } from "@doist/todoist-api-typescript";
+
 import "dotenv/config";
 
 const prisma = new PrismaClient();
@@ -15,6 +17,8 @@ const app = new Slack.App({
   token: process.env.SLACK_BOT_TOKEN,
   receiver: expressReceiver,
 });
+
+const todoist = new TodoistApi(process.env.TODOIST_API_TOKEN!);
 
 let count = 0;
 
@@ -31,72 +35,77 @@ expressApp.get("/status", async (req, res) => {
 });
 
 async function refreshTasks() {
-  const data = new FormData();
-  data.set("token", process.env.SLACK_CLIENT_TOKEN!);
-  data.set("_x_app_name", "client");
-  data.set("_x_reason", "saved-api/savedList");
-  data.set("_x_mode", "online");
-  data.set("_x_sonic", "true");
-  data.set("filter", "saved");
+  const tasks = await todoist.getTasks();
+  count = tasks.results.length;
 
-  await fetch(
-    "https://hackclub.slack.com/api/saved.list?_x_id=829ee587-1712708450.151&_x_csid=JmcOvVbEE0U&slack_route=T0266FRGM&_x_version_ts=1712706141&_x_frontend_build_type=current&_x_desktop_ia=4&_x_gantry=true&fp=22",
-    {
-      method: "POST",
-      body: data,
-      headers: {
-        Cookie: process.env.SLACK_COOKIE!,
-      },
-    },
-  )
-    .then((res) => res.json())
-    .then(async (data) => {
-      if (data.ok) {
-        count =
-          data.counts.uncompleted_count + data.counts.uncompleted_overdue_count;
+  updateCount();
 
-        const savedIds = data.saved_items.map((i: any) => i.ts);
-        for (const item of data.saved_items) {
-          await prisma.item.upsert({
-            where: {
-              ts: item.ts,
-            },
-            create: {
-              ts: item.ts,
-              timeAdded: new Date(item.date_created * 1000),
-              timeRemoved: null,
-            },
-            update: {
-              timeAdded: new Date(item.date_created * 1000),
-              timeRemoved: null,
-            },
-          });
-        }
+  // const data = new FormData();
+  // data.set("token", process.env.SLACK_CLIENT_TOKEN!);
+  // data.set("_x_app_name", "client");
+  // data.set("_x_reason", "saved-api/savedList");
+  // data.set("_x_mode", "online");
+  // data.set("_x_sonic", "true");
+  // data.set("filter", "saved");
 
-        const currentItems = await prisma.item.findMany({
-          where: {
-            timeRemoved: null,
-          },
-        });
+  // await fetch(
+  //   "https://hackclub.slack.com/api/saved.list?_x_id=829ee587-1712708450.151&_x_csid=JmcOvVbEE0U&slack_route=T0266FRGM&_x_version_ts=1712706141&_x_frontend_build_type=current&_x_desktop_ia=4&_x_gantry=true&fp=22",
+  //   {
+  //     method: "POST",
+  //     body: data,
+  //     headers: {
+  //       Cookie: process.env.SLACK_COOKIE!,
+  //     },
+  //   },
+  // )
+  //   .then((res) => res.json())
+  //   .then(async (data) => {
+  //     if (data.ok) {
+  //       count =
+  //         data.counts.uncompleted_count + data.counts.uncompleted_overdue_count;
 
-        const removedItems = currentItems.filter(
-          (i) => !savedIds.includes(i.ts),
-        );
+  //       const savedIds = data.saved_items.map((i: any) => i.ts);
+  //       for (const item of data.saved_items) {
+  //         await prisma.item.upsert({
+  //           where: {
+  //             ts: item.ts,
+  //           },
+  //           create: {
+  //             ts: item.ts,
+  //             timeAdded: new Date(item.date_created * 1000),
+  //             timeRemoved: null,
+  //           },
+  //           update: {
+  //             timeAdded: new Date(item.date_created * 1000),
+  //             timeRemoved: null,
+  //           },
+  //         });
+  //       }
 
-        for (const item of removedItems) {
-          await prisma.item.update({
-            where: {
-              ts: item.ts,
-            },
-            data: {
-              timeRemoved: new Date(),
-            },
-          });
-        }
+  //       const currentItems = await prisma.item.findMany({
+  //         where: {
+  //           timeRemoved: null,
+  //         },
+  //       });
 
-        updateCount();
-      }
-    });
+  //       const removedItems = currentItems.filter(
+  //         (i) => !savedIds.includes(i.ts),
+  //       );
+
+  //       for (const item of removedItems) {
+  //         await prisma.item.update({
+  //           where: {
+  //             ts: item.ts,
+  //           },
+  //           data: {
+  //             timeRemoved: new Date(),
+  //           },
+  //         });
+  //       }
+
+  //       updateCount();
+  //     }
+  //   });
 }
 
 async function calculateAverage() {

@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@doist/todoist-api-typescript": "^4.0.0",
     "@prisma/client": "^5.19.0",
     "@slack/bolt": "^3.17.1",
     "dotenv": "^16.4.5",
