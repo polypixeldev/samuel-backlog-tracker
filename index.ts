@@ -55,7 +55,7 @@ async function refreshTasks() {
         count =
           data.counts.uncompleted_count + data.counts.uncompleted_overdue_count;
 
-        const savedIds = data.saved_items.map((i) => i.ts);
+        const savedIds = data.saved_items.map((i: any) => i.ts);
         for (const item of data.saved_items) {
           await prisma.item.upsert({
             where: {
