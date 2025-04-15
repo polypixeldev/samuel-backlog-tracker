@@ -35,7 +35,9 @@ expressApp.get("/status", async (req, res) => {
 });
 
 async function refreshTasks() {
-  const tasks = await todoist.getTasks();
+  const tasks = await todoist.getTasksByFilter({
+    query: "today",
+  });
   count = tasks.results.length;
 
   updateCount();
@@ -145,7 +147,7 @@ async function updateCount() {
   app.client.bookmarks.edit({
     bookmark_id: countId!,
     channel_id: process.env.SLACK_CHANNEL_ID!,
-    title: `${count} items to complete!`,
+    title: `${count} tasks left today`,
   });
 
   app.client.bookmarks.edit({
